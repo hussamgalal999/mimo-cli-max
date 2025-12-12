@@ -28,6 +28,9 @@ export class ParallelExecutor {
         this.concurrency = concurrency;
     }
 
+    /**
+     * Adds a task to the task manager.
+     */
     addTask<T>(task: Task<T>): void {
         this.tasks.set(task.id, task);
         this.results.set(task.id, {
@@ -39,6 +42,14 @@ export class ParallelExecutor {
         });
     }
 
+    /**
+     * Executes tasks concurrently and tracks their completion status.
+     *
+     * This function manages the execution of tasks by maintaining sets for executing, completed, and failed tasks.
+     * It retrieves available tasks and starts them based on the defined concurrency limit.
+     * The function continues to run until all tasks are either completed or failed,
+     * periodically checking for new tasks to execute and updating the status of each task accordingly.
+     */
     async execute(): Promise<Map<string, TaskResult>> {
         const executing: Set<string> = new Set();
         const completed: Set<string> = new Set();
@@ -69,6 +80,17 @@ export class ParallelExecutor {
         return this.results;
     }
 
+    /**
+     * Retrieve a list of available tasks based on completion and failure status.
+     *
+     * The function iterates through the tasks, checking if each task has been completed or failed.
+     * It also verifies if the task's dependencies are met before adding it to the available list.
+     * Finally, the available tasks are sorted by priority in descending order before being returned.
+     *
+     * @param completed - A Set of task IDs that have been completed.
+     * @param failed - A Set of task IDs that have failed.
+     * @returns An array of task IDs that are available for execution.
+     */
     private getAvailableTasks(completed: Set<string>, failed: Set<string>): string[] {
         const available: string[] = [];
 
@@ -120,6 +142,9 @@ export class ParallelExecutor {
         }
     }
 
+    /**
+     * Retrieves the TaskResult associated with the given taskId.
+     */
     getResult(taskId: string): TaskResult | undefined {
         return this.results.get(taskId);
     }
@@ -136,6 +161,9 @@ export class ParallelExecutor {
         return Array.from(this.results.values()).filter(r => r.status === 'failed');
     }
 
+    /**
+     * Returns the maximum duration from the results.
+     */
     getTotalDuration(): number {
         let maxDuration = 0;
         for (const result of this.results.values()) {
