@@ -164,6 +164,6 @@ export const icons = {
 // 📐 Layout Constants
 export const layout = {
     dashboardWidth: 80,
-    animationSpeed: 100,
-    pulseSpeed: 200,
+    animationSpeed: 20,
+    pulseSpeed: 40,
 };

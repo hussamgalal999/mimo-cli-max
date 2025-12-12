@@ -73,14 +73,14 @@ export class MimoAnimator {
 
         for (const step of bootSteps) {
             logUpdate(renderDashboardFrame(step.state, step.text, theme.dim));
-            await setTimeout(300);
+            await setTimeout(50);
         }
 
         logUpdate(renderDashboardFrame('shock', 'WAKING UP...', theme.warning));
-        await setTimeout(400);
+        await setTimeout(50);
 
         logUpdate(renderDashboardFrame('success', 'SYSTEM ONLINE', theme.success));
-        await setTimeout(400);
+        await setTimeout(50);
 
         logUpdate.done();
     }
@@ -130,7 +130,7 @@ export class MimoAnimator {
         for (let i = 0; i < 6; i++) {
             const currentState = frames[i % frames.length]!;
             logUpdate(renderDashboardFrame(currentState, message, theme.success));
-            await setTimeout(180);
+            await setTimeout(30);
         }
 
         logUpdate.done();
@@ -142,10 +142,10 @@ export class MimoAnimator {
     static async farewell(): Promise<void> {
         console.clear();
         console.log(renderBlockAvatar('love'));
-        await setTimeout(600);
+        await setTimeout(100);
         console.clear();
         console.log(renderBlockAvatar('sleep'));
-        await setTimeout(800);
+        await setTimeout(100);
         console.clear();
     }
 
