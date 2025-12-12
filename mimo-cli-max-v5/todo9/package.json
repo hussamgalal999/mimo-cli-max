@@ -1,0 +1,10 @@
+{
+  "name": "todo9",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "npx tsx src/index.ts",
+    "build": "tsc"
+  }
+}

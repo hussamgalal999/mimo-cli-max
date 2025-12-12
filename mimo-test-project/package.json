@@ -1,0 +1,13 @@
+{
+  "name": "mimo-test-project",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Test project created by MIMO-MAX to verify file operations",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "npx tsx src/index.ts",
+    "build": "tsc"
+  },
+  "author": "MIMO-MAX",
+  "license": "MIT"
+}
