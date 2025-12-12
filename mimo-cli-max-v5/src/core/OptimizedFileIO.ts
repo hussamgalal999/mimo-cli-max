@@ -26,6 +26,9 @@ export class OptimizedFileIO {
     private batchSize: number = 10;
     private bufferSize: number = 64 * 1024;
 
+    /**
+     * Reads a file as a stream and processes it in chunks.
+     */
     async readFileStreamed(
         filePath: string,
         onChunk?: (chunk: string | Buffer) => void
@@ -50,6 +53,9 @@ export class OptimizedFileIO {
         });
     }
 
+    /**
+     * Writes content to a file using a stream.
+     */
     async writeFileStreamed(filePath: string, content: string | Buffer): Promise<void> {
         return new Promise((resolve, reject) => {
             const stream = createWriteStream(filePath, { highWaterMark: this.bufferSize });
@@ -69,6 +75,15 @@ export class OptimizedFileIO {
         });
     }
 
+    /**
+     * Reads files in batches and returns the results of the read operations.
+     *
+     * The function processes an array of file paths in chunks defined by this.batchSize.
+     * For each batch, it invokes the readFileSafe method to read the files concurrently
+     * and aggregates the results, counting the number of successful and failed reads.
+     *
+     * @param filePaths - An array of file paths to be read.
+     */
     async batchReadFiles(filePaths: string[]): Promise<BatchResult> {
         const results: BatchResult = {
             success: 0,
@@ -125,6 +140,16 @@ export class OptimizedFileIO {
         return results;
     }
 
+    /**
+     * Executes a batch of operations and returns the results.
+     *
+     * The function processes the provided operations in batches, executing each operation asynchronously.
+     * It aggregates the results, counting the number of successful and failed operations, and returns
+     * a summary of the execution results. The operations are divided into smaller batches based on
+     * the specified batch size, and each operation is executed using the `executeSingleOperation` method.
+     *
+     * @param operations - An array of BatchOperation objects to be executed.
+     */
     async batchExecuteOperations(operations: BatchOperation[]): Promise<BatchResult> {
         const results: BatchResult = {
             success: 0,
@@ -151,6 +176,13 @@ export class OptimizedFileIO {
         return results;
     }
 
+    /**
+     * Safely reads a file and returns its contents or an error.
+     *
+     * This function attempts to read a file specified by the filePath. If successful, it returns an object containing the filePath, a success flag, and the file data. In case of an error, it logs a warning and returns an object with the filePath, a success flag set to false, and the error encountered.
+     *
+     * @param {string} filePath - The path to the file to be read.
+     */
     private async readFileSafe(filePath: string): Promise<{ filePath: string; success: boolean; error?: Error; data?: Buffer }> {
         try {
             const data = await fs.promises.readFile(filePath);
@@ -162,6 +194,16 @@ export class OptimizedFileIO {
         }
     }
 
+    /**
+     * Safely writes content to a specified file.
+     *
+     * This function attempts to write the provided content to the file at the given filePath.
+     * If the write operation is successful, it returns an object indicating success.
+     * In case of an error, it logs a warning and returns an object with the error details.
+     *
+     * @param {string} filePath - The path to the file where content will be written.
+     * @param {string} content - The content to be written to the file.
+     */
     private async writeFileSafe(filePath: string, content: string): Promise<{ filePath: string; success: boolean; error?: Error }> {
         try {
             await fs.promises.writeFile(filePath, content, 'utf-8');
@@ -194,6 +236,16 @@ export class OptimizedFileIO {
         }
     }
 
+    /**
+     * Recursively find files in a directory that match a given pattern.
+     *
+     * The function traverses the directory structure up to a specified maximum depth, checking each file against the provided regular expression pattern. If a match is found, the full path of the file is added to the results. The traversal is performed asynchronously, and errors during directory reading are logged for debugging purposes.
+     *
+     * @param dir - The directory path to start the search from.
+     * @param pattern - The regular expression pattern to match file names against.
+     * @param maxDepth - The maximum depth to traverse in the directory structure (default is 10).
+     * @returns A promise that resolves to an array of matching file paths.
+     */
     async findFilesRecursive(
         dir: string,
         pattern: RegExp,
@@ -238,6 +290,15 @@ export class OptimizedFileIO {
         });
     }
 
+    /**
+     * Retrieves the size of a file at the specified path.
+     *
+     * This asynchronous function uses the `fs.promises.stat` method to obtain the file statistics,
+     * including its size. If the operation fails, it logs a warning and returns 0.
+     * This function is designed to handle potential errors gracefully.
+     *
+     * @param {string} filePath - The path to the file whose size is to be retrieved.
+     */
     async getFileSizeOptimized(filePath: string): Promise<number> {
         try {
             const stats = await fs.promises.stat(filePath);
