@@ -72,10 +72,23 @@ export class ErrorRecovery {
         });
     }
 
+    /**
+     * Registers a recovery strategy.
+     */
     registerStrategy(strategy: RecoveryStrategy): void {
         this.strategies.set(strategy.name, strategy);
     }
 
+    /**
+     * Executes an operation with a recovery strategy, retrying on failure.
+     *
+     * The function retrieves a specified recovery strategy or defaults to a predefined one. It attempts to execute the provided operation, logging success or failure, and determining whether to retry based on the strategy's rules. If the operation fails, it will retry up to the maximum number of retries defined in the strategy, applying a backoff delay between attempts. The final result includes success status, number of attempts, and any error encountered.
+     *
+     * @param operation - A function that returns a Promise representing the operation to be executed.
+     * @param strategyName - An optional name of the recovery strategy to use.
+     * @returns A Promise that resolves to a RecoveryResult indicating the success status, number of attempts, and any final error.
+     * @throws Error If the specified strategy is not found.
+     */
     async executeWithRecovery<T>(
         operation: () => Promise<T>,
         strategyName?: string
@@ -115,6 +128,9 @@ export class ErrorRecovery {
         return { success: false, attempts, finalError: lastError };
     }
 
+    /**
+     * Calculates the backoff time based on the attempt number and recovery strategy.
+     */
     private calculateBackoff(attempt: number, strategy: RecoveryStrategy): number {
         if (!strategy.exponentialBackoff) {
             return strategy.backoffMs;
@@ -123,6 +139,9 @@ export class ErrorRecovery {
         return strategy.backoffMs * Math.pow(2, attempt - 1) + Math.random() * 100;
     }
 
+    /**
+     * Pauses execution for a specified number of milliseconds.
+     */
     private sleep(ms: number): Promise<void> {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -139,6 +158,15 @@ export class CircuitBreaker {
         private resetTimeoutMs: number = 60000
     ) {}
 
+    /**
+     * Executes an operation with a circuit breaker pattern.
+     *
+     * This function checks the state of the circuit breaker before executing the provided operation.
+     * If the state is 'open' and the reset timeout has not elapsed, it throws an error.
+     * If the operation succeeds, it calls `onSuccess`, otherwise it calls `onFailure` and rethrows the error.
+     *
+     * @param operation - A function that returns a Promise to be executed.
+     */
     async executeWithCircuitBreaker<T>(
         operation: () => Promise<T>
     ): Promise<T> {
@@ -161,6 +189,9 @@ export class CircuitBreaker {
         }
     }
 
+    /**
+     * Resets failure count and updates state based on success conditions.
+     */
     private onSuccess(): void {
         this.failureCount = 0;
         if (this.state === 'half_open') {
@@ -172,6 +203,9 @@ export class CircuitBreaker {
         }
     }
 
+    /**
+     * Handles a failure by incrementing the failure count and updating the last failure time.
+     */
     private onFailure(): void {
         this.failureCount++;
         this.lastFailureTime = Date.now();
@@ -180,6 +214,9 @@ export class CircuitBreaker {
         }
     }
 
+    /**
+     * Retrieves the current state.
+     */
     getState(): 'closed' | 'open' | 'half_open' {
         return this.state;
     }
